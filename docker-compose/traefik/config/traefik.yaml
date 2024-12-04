@@ -11,6 +11,12 @@ entryPoints:
     address: ":80"
   websecure:
     address: ":443"
+  postgres-game:
+    address: ":5432"
+  postgres-auth:
+    address: ":5433"
+  dragonfly:
+    address: ":6379"
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"

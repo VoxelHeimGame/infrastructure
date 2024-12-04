@@ -1,0 +1,26 @@
+services:
+  minio:
+    image: minio/minio
+    volumes:
+      - ./config/minio.json:/etc/config.json
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`minio.localhost`)"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+      - "traefik.http.routers.minio-web.rule=Host(`minio-web.localhost`)"
+      - "traefik.http.services.minio-web.loadbalancer.server.port=9001"
+
+volumes:
+  minio_data:
+    external: true
+
+networks:
+  traefik-public:
+    external: true

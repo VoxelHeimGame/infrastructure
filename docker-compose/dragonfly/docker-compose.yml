@@ -1,0 +1,24 @@
+services:
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    ulimits:
+      memlock: -1
+    volumes:
+      - ./config/dragonfly.conf:/etc/dragonfly/dragonfly.conf
+      - dragonfly_data:/data
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.dragonfly.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.dragonfly.entrypoints=dragonfly"
+      - "traefik.tcp.services.dragonfly.loadbalancer.server.port=6379"
+
+volumes:
+  dragonfly_data:
+    external: true
+
+networks:
+  traefik-public:
+    external: true
+
