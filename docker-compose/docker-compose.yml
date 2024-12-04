@@ -1,0 +1,38 @@
+services:
+  auth-service:
+    build:
+      context: ../../auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=Host(`api.localhost`) && PathPrefix(`/auth`)"
+      - "traefik.http.services.auth.loadbalancer.server.port=3001"
+      - "traefik.http.middlewares.auth-strip-prefix.stripprefix.prefixes=/auth"
+      - "traefik.http.routers.auth.middlewares=auth-strip-prefix@docker"
+      - "traefik.docker.network=api-gateway"
+    networks:
+      - api-gateway
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  traefik:
+    image: traefik:v3.2
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik.yaml:/etc/traefik/traefik.yaml:ro
+    networks:
+      - api-gateway
+
+networks:
+  api-gateway:
+    name: api-gateway
+
