@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: voxelheim-dev-env
+data:
+  API_HOST: "api.localhost"
+  API_PORT: "3001"
+  AUTH_PATH: "/auth"
+  AUTH_DB_HOST: "localhost"
+  AUTH_DB_PORT: "5432"
+  AUTH_DB_NAME: "auth_db"
+

@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-config
+data:
+  traefik.yaml: |
+    api:
+      insecure: true
+      dashboard: true
+    entryPoints:
+      web:
+        address: ":80"
+      websecure:
+        address: ":443"
+      postgres-auth:
+        address: ":5432"
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true
+      kubernetesIngress: {}
+    log:
+      level: DEBUG
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  labels:
+    app: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-account
+      containers:
+      - name: traefik
+        image: traefik:v2.10
+        args:
+        - --api.insecure=true
+        - --api.dashboard=true
+        - --providers.kubernetesCRD
+        - --providers.kubernetesIngress
+        - --entrypoints.web.address=:80
+        - --entrypoints.websecure.address=:443
+        - --entrypoints.postgres-auth.address=:5432
+        - --log.level=DEBUG
+        ports:
+        - name: web
+          containerPort: 80
+        - name: websecure
+          containerPort: 443
+        - name: admin
+          containerPort: 8080
+        - name: postgres-auth
+          containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+spec:
+  selector:
+    app: traefik
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    name: web
+  - protocol: TCP
+    port: 443
+    targetPort: 443
+    name: websecure
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    name: admin
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+    name: postgres-auth
+  type: LoadBalancer
+
