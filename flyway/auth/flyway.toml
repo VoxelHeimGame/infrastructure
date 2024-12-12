@@ -1,0 +1,33 @@
+databaseType = "PostgreSql"
+id = "b85cf4eb-bf10-481d-8e06-6d6a6dd83290"
+name = "auth_db"
+
+[environments.dev]
+schemas = [ "public" ]
+displayName = "Dev (Docker)"
+
+[environments.live]
+schemas = [ "public" ]
+displayName = "Live (Kubernetes)"
+
+[flyway]
+environment = "dev"
+locations = [ "filesystem:/sql" ]
+mixed = true
+outOfOrder = true
+schemaModelLocation = "schema-model"
+validateMigrationNaming = true
+
+  [flyway.check]
+  majorTolerance = 0
+
+[flywayDesktop]
+developmentEnvironment = "dev"
+shadowEnvironment = "shadow"
+
+[redgateCompare]
+filterFile = "filter.rgf"
+
+[redgateCompare.postgresql.options.ignores]
+ignoreNewlinesInTextObjects = "off"
+

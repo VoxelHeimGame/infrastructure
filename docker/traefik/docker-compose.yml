@@ -1,0 +1,28 @@
+services:
+  traefik:
+    image: traefik:v3.2
+    command:
+      - "--global.checkNewVersion=false"
+      - "--global.sendAnonymousUsage=false"
+      - "--log.level=DEBUG"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.postgres-auth.address=:${AUTH_DB_PORT}"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+      - "${AUTH_DB_PORT}:${AUTH_DB_PORT}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik-public
+
+networks:
+  traefik-public:
+    external: true

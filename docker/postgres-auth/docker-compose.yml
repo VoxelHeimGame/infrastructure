@@ -1,0 +1,24 @@
+services:
+  postgres-auth:
+    image: citusdata/citus:11.2
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    volumes:
+      - ./config/db.conf:/etc/postgresql/postgresql.conf
+      - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.postgres-auth.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.postgres-auth.entrypoints=postgres-auth"
+      - "traefik.tcp.services.postgres-auth.loadbalancer.server.port=5432"
+
+volumes:
+  postgres_auth_data:
+
+networks:
+  traefik-public:
+    external: true

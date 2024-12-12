@@ -1,0 +1,22 @@
+{
+    "name": "voxelheim-infrastructure",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "setup:dev": "bun run scripts/setup.js dev",
+        "setup:dev:k8s": "bun run scripts/setup.js dev true",
+        "setup:ptu": "bun run scripts/setup.js ptu",
+        "setup:live": "bun run ./scripts/setup.js live",
+        "deploy:dev": "bun run scripts/deploy.js dev",
+        "deploy:dev:k8s": "bun run scripts/deploy.js dev true",
+        "deploy:ptu": "bun run scripts/deploy.js ptu",
+        "deploy:live": "bun run scripts/deploy.js live",
+        "migrate:dev": "bun run scripts/runMigrations.js dev",
+        "migrate:ptu": "bun run scripts/runMigrations.js ptu",
+        "migrate:live": "bun run scripts/runMigrations.js live",
+        "lint": "biome lint"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "1.9.4"
+    }
+}

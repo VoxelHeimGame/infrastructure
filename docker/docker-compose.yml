@@ -1,0 +1,46 @@
+services:
+  auth-service:
+    build:
+      context: ../../auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    environment:
+      - API_HOST=${API_HOST}
+      - API_PORT=${API_PORT}
+      - AUTH_PATH=${AUTH_PATH}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_DB_HOST=${AUTH_DB_HOST}
+      - AUTH_DB_PORT=${AUTH_DB_PORT}
+      - AUTH_DB_NAME=${AUTH_DB_NAME}
+      - AUTH_DB_USER=${AUTH_DB_USER}
+      - AUTH_DB_PASSWORD=${AUTH_DB_PASSWORD}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=Host(`${API_HOST}`) && PathPrefix(`${AUTH_PATH}`)"
+      - "traefik.http.services.auth.loadbalancer.server.port=${API_PORT}"
+      - "traefik.http.middlewares.auth-strip-prefix.stripprefix.prefixes=${AUTH_PATH}"
+      - "traefik.http.routers.auth.middlewares=auth-strip-prefix@docker"
+    networks:
+      - traefik-public
+    depends_on:
+      - postgres-auth
+      - traefik
+
+  postgres-auth:
+    extends:
+      file: ./postgres-auth/docker-compose.yml
+      service: postgres-auth
+
+  traefik:
+    extends:
+      file: ./traefik/docker-compose.yml
+      service: traefik
+    environment:
+      - AUTH_DB_PORT=${AUTH_DB_PORT}
+
+volumes:
+  postgres_auth_data:
+
+networks:
+  traefik-public:
+    external: true
