@@ -1,0 +1,30 @@
+api:
+  dashboard: true
+  insecure: true
+
+log:
+  level: INFO
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: traefik-public
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+  postgres:
+    address: ":5432"
+  rabbitmq:
+    address: ":5672"
+
+http:
+  routers:
+    dashboard:
+      rule: "Host(`traefik.localhost`)"
+      service: "api@internal"
+      entrypoints:
+        - web

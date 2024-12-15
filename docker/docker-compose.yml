@@ -9,11 +9,16 @@ services:
       - API_PORT=${API_PORT}
       - AUTH_PATH=${AUTH_PATH}
       - AUTH_SECRET=${AUTH_SECRET}
-      - AUTH_DB_HOST=${AUTH_DB_HOST}
-      - AUTH_DB_PORT=${AUTH_DB_PORT}
+      - AUTH_DB_HOST=postgres-auth-db
+      - AUTH_DB_PORT=5432
       - AUTH_DB_NAME=${AUTH_DB_NAME}
       - AUTH_DB_USER=${AUTH_DB_USER}
       - AUTH_DB_PASSWORD=${AUTH_DB_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOSTNAME}
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_VHOST=${RABBITMQ_DEFAULT_VHOST}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=Host(`${API_HOST}`) && PathPrefix(`${AUTH_PATH}`)"
@@ -23,23 +28,28 @@ services:
     networks:
       - traefik-public
     depends_on:
-      - postgres-auth
+      - postgres-auth-db
+      - rabbitmq-broker
       - traefik
 
-  postgres-auth:
+  postgres-auth-db:
     extends:
       file: ./postgres-auth/docker-compose.yml
-      service: postgres-auth
+      service: postgres-auth-db
+
+  rabbitmq-broker:
+    extends:
+      file: ./rabbitmq/docker-compose.yml
+      service: rabbitmq-broker
 
   traefik:
     extends:
       file: ./traefik/docker-compose.yml
       service: traefik
-    environment:
-      - AUTH_DB_PORT=${AUTH_DB_PORT}
 
 volumes:
   postgres_auth_data:
+  rabbitmq_data:
 
 networks:
   traefik-public:

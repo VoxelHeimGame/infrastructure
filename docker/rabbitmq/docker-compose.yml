@@ -1,0 +1,29 @@
+services:
+  rabbitmq-broker:
+    image: rabbitmq:4.0.4-management
+    hostname: ${RABBITMQ_HOSTNAME}
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      # AMQP
+      - "traefik.tcp.routers.rabbitmq.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.rabbitmq.entrypoints=rabbitmq"
+      - "traefik.tcp.services.rabbitmq.loadbalancer.server.port=5672"
+      # Management UI
+      - "traefik.http.routers.rabbitmq-ui.rule=Host(`${RABBITMQ_UI_HOST}`)"
+      - "traefik.http.routers.rabbitmq-ui.entrypoints=web"
+      - "traefik.http.services.rabbitmq-ui.loadbalancer.server.port=15672"
+
+volumes:
+  rabbitmq_data:
+
+networks:
+  traefik-public:
+    external: true
